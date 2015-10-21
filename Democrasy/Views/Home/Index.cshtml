@@ -38,7 +38,6 @@
                     </div>
                 </form>
             </div>
-            
         </div>
     </div>
 </div>
@@ -47,25 +46,7 @@
 @section scripts
 {
     <script>
-        var manifestSkip = 0;
-
-        // Add string.format()
-        (function () {
-            if (!String.format) {
-                String.format = function (format) {
-                    var args = Array.prototype.slice.call(arguments, 1);
-                    return format.replace(/{(\d+)}/g, function (match, number) {
-                        return typeof args[number] != 'undefined'
-                          ? args[number]
-                          : match
-                        ;
-                    });
-                };
-            }
-        })();
-
         $(document).ready(function () {
-
             $('.grid').masonry({
                 // options
                 itemSelector: '.grid-item',
@@ -77,93 +58,5 @@
 
             GetTopManifests(8);
         });
-
-        // Get top n manifests from server and append to the DOM
-        var GetTopManifests = function (num) {
-            $.ajax({
-                url: "/Manifest/GetTopRanked/",
-                data: { numOfRecords: num, skip: manifestSkip },
-                cache: false,
-                type: "GET",
-                success: function (data) {
-                    //var markup = "";
-                    if (jQuery.isEmptyObject(data)) {
-                        DisableGetMore();
-                    }
-                    else {
-                        if (data.length < num) {
-                            DisableGetMore();
-                        }
-
-                        for (var i = 0; i < data.length; i++) {
-                            var currManifest = data[i];
-
-                            var markup = String.format('<div id="{0}" class="panel panel-default grid-item"> <div class="row"> <div class="col-xs-6"> <h4 class="panel-heading">{1}</h4> </div> <div class="col-xs-6"> <h4 class="panel-heading">{2}</h4> </div> </div> <p class="panel-body">{3}</p> <div class="row text-center rank-manage"> <div class="col-xs-4"> <button type="button" class="btn btn-default glyph-button" onClick="DownvoteManifest(\'{0}\');"> <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> </button> </div> <div class="col-xs-4"> <p class="rank">{4}</p> </div> <div class="col-xs-4"> <button type="button" class="btn btn-default glyph-button" onClick="UpvoteManifest(\'{0}\');"> <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> </button> </div> </div> </div>',
-                                currManifest.Id, currManifest.Author, currManifest.Timestamp, currManifest.Text, currManifest.Rank);
-
-                            var item = $(markup);
-
-                            $('.grid').masonry()
-                                .append(item)
-                                .masonry('appended', item);
-                        }
-
-                        manifestSkip += data.length;
-                    }
-                },
-                error: function (reponse) {
-                    alert("error : " + reponse);
-                }
-            });
-        }
-
-        // Upvote requested manifest
-        var UpvoteManifest = function (manifestId) {
-            var url = "/Manifest/Upvote/";
-            $.ajax({
-                url: url,
-                data: { id: manifestId },
-                cache: false,
-                type: "POST",
-                success: function (result) {
-                    if (result == "True") {
-                        var rank = $('#' + manifestId + ' .rank').text();
-                        rank++;
-                        $('#' + manifestId + ' .rank').text(rank);
-                        $('#' + manifestId + ' :button').prop('disabled', true);
-                    }
-                    else {
-                        alert("Unable to upvote post");
-                    }
-                }
-            });
-        }
-
-        // Downvote requested manifest
-        var DownvoteManifest = function (manifestId) {
-            var url = "/Manifest/Downvote/";
-            $.ajax({
-                url: url,
-                data: { id: manifestId },
-                cache: false,
-                type: "POST",
-                success: function (result) {
-                    if (result == "True") {
-                        var rank = $('#' + manifestId + ' .rank').text();
-                        rank--;
-                        $('#' + manifestId + ' .rank').text(rank);
-                        $('#' + manifestId + ' :button').prop('disabled', true);
-                    }
-                    else {
-                        alert("Unable to downvote post");
-                    }
-                }
-            });
-        }
-
-        var DisableGetMore = function () {
-            $('#getmore span').removeClass('glyphicon-menu-down').addClass('glyphicon-minus');
-            $('#getmore').prop('disabled', true);
-        }
     </script>
 }

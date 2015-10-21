@@ -1,4 +1,5 @@
-﻿
+﻿var manifestSkip = 0;
+
 // Add string.format()
 (function () {
     if (!String.format) {
@@ -14,32 +15,99 @@
     }
 })();
 
-// Get top n manifests from the server
-var GetTopManifests = function(num) {
+// Get newest n manifests from server and append to the DOM
+var GetNewManifests = function (num) {
+    GetManifests(num, "/Manifest/GetNewest/");
+}
+
+// Get top n manifests from server and append to the DOM
+var GetTopManifests = function (num) {
+    GetManifests(num, "/Manifest/GetTopRanked/");
+}
+
+// Get manifests from server and append to the DOM
+var GetManifests = function (num, url) {
     $.ajax({
-        url: "/Manifest/GetTopRanked/",
-        data: { numOfRecords: num },
+        url: url,
+        data: { numOfRecords: num, skip: manifestSkip },
         cache: false,
         type: "GET",
         success: function (data) {
             if (jQuery.isEmptyObject(data)) {
-                return false;
+                DisableGetMore();
             }
             else {
-                var result = [];
+                if (data.length < num) {
+                    DisableGetMore();
+                }
 
                 for (var i = 0; i < data.length; i++) {
                     var currManifest = data[i];
-                    var manifestObj = String.format('<div id="{0}" class="panel panel-default grid-item"> <div class="row"> <div class="col-xs-6"> <h4 class="panel-heading">{1}</h4> </div> <div class="col-xs-6"> <h4 class="panel-heading">{2}</h4> </div> </div> <p class="panel-body">{3}</p> <div class="row"> <div class="col-md-4"> <button type="button" class="btn btn-default" onClick="DownvoteManifest("{0}");"> <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> </button> </div> <div class="col-md-4"> <p class="rank">{4}</p> </div> <div class="col-md-4"> <button type="button" class="btn btn-default" onClick="UpvoteManifest("{0}");"> <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> </button> </div> </div> </div>',
+
+                    var markup = String.format('<div id="{0}" class="panel panel-default grid-item"> <div class="row"> <div class="col-xs-6"> <h4 class="panel-heading">{1}</h4> </div> <div class="col-xs-6"> <h4 class="panel-heading">{2}</h4> </div> </div> <p class="panel-body">{3}</p> <div class="row text-center rank-manage"> <div class="col-xs-4"> <button type="button" class="btn btn-default glyph-button" onClick="DownvoteManifest(\'{0}\');"> <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> </button> </div> <div class="col-xs-4"> <p class="rank">{4}</p> </div> <div class="col-xs-4"> <button type="button" class="btn btn-default glyph-button" onClick="UpvoteManifest(\'{0}\');"> <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> </button> </div> </div> </div>',
                         currManifest.Id, currManifest.Author, currManifest.Timestamp, currManifest.Text, currManifest.Rank);
-                    result.push($(manifestObj));
+
+                    var item = $(markup);
+
+                    $('.grid').masonry()
+                        .append(item)
+                        .masonry('appended', item);
                 }
 
-                return result;
+                manifestSkip += data.length;
             }
         },
         error: function (reponse) {
-            return false;
+            alert("error : " + reponse);
         }
     });
+}
+
+// Upvote requested manifest
+var UpvoteManifest = function (manifestId) {
+    var url = "/Manifest/Upvote/";
+    $.ajax({
+        url: url,
+        data: { id: manifestId },
+        cache: false,
+        type: "POST",
+        success: function (result) {
+            if (result == "True") {
+                var rank = $('#' + manifestId + ' .rank').text();
+                rank++;
+                $('#' + manifestId + ' .rank').text(rank);
+                $('#' + manifestId + ' :button').prop('disabled', true);
+            }
+            else {
+                alert("Unable to upvote post");
+            }
+        }
+    });
+}
+
+// Downvote requested manifest
+var DownvoteManifest = function (manifestId) {
+    var url = "/Manifest/Downvote/";
+    $.ajax({
+        url: url,
+        data: { id: manifestId },
+        cache: false,
+        type: "POST",
+        success: function (result) {
+            if (result == "True") {
+                var rank = $('#' + manifestId + ' .rank').text();
+                rank--;
+                $('#' + manifestId + ' .rank').text(rank);
+                $('#' + manifestId + ' :button').prop('disabled', true);
+            }
+            else {
+                alert("Unable to downvote post");
+            }
+        }
+    });
+}
+
+var DisableGetMore = function () {
+    $('#getmore span').removeClass('glyphicon-menu-down').addClass('glyphicon-minus');
+    $('#getmore').prop('disabled', true)
 }
