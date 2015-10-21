@@ -1,0 +1,32 @@
+﻿.grid-item {
+    border: 2px solid hsla(0, 0%, 0%, 0.5);
+    width: 300px;
+    float:left;
+    margin-bottom: 15px;
+}
+
+.glyph-button {
+    -webkit-appearance: none;
+    outline: none;
+    border: 0;
+    background: transparent;
+}
+
+.rank-manage {
+    font-size: 120%;
+    color: #0066CC;
+}
+
+.center {
+    margin: auto;
+    width: 90%;
+    /*padding: 10px;*/
+}
+
+#ManifestsContainer {
+    margin: 20px;
+}
+
+#getmore {
+    font-size: 350%;
+}

@@ -1,0 +1,169 @@
+﻿@{
+    ViewBag.Title = "Democrasy - Top Rated Manifests";
+}
+
+<div id="main" class="container-fluid center">
+    <div id="ManifestsContainer" class="grid">
+        <div id="CreateNew" class="panel panel-default grid-item text-center">
+            <button class="panel-body" data-toggle="modal" data-target="#createmanifest" style="position: relative">Create New Manifest</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            <button id="getmore" class="glyph-button" onclick="GetTopManifests(8);"><span class="glyphicon glyphicon-menu-down"></span></button>
+        </div>
+    </div>
+</div>
+
+@*Create new manifest modal*@
+<div class="modal fade" id="createmanifest" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Create new manifest</h4>
+            </div>
+            <div class="modal-body">
+                <form data-toggle="validator" role="form" action="/Manifest/Create" method="post">
+                    <div class="form-group">
+                        <label for="author-name" class="control-label">Author:</label>
+                        <input type="text" name="author" class="form-control" id="author-name" maxlength="30" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="control-label">Message:</label>
+                        <textarea name="text" class="form-control" id="message-text" rows="5" maxlength="500" required></textarea>
+                    </div>
+                    <div class="form-group" id="endofpage">
+                        <input type="submit" class="btn btn-primary" value="Post">
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+@section scripts
+{
+    <script>
+        var manifestSkip = 0;
+
+        // Add string.format()
+        (function () {
+            if (!String.format) {
+                String.format = function (format) {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    return format.replace(/{(\d+)}/g, function (match, number) {
+                        return typeof args[number] != 'undefined'
+                          ? args[number]
+                          : match
+                        ;
+                    });
+                };
+            }
+        })();
+
+        $(document).ready(function () {
+
+            $('.grid').masonry({
+                // options
+                itemSelector: '.grid-item',
+                columnWidth: 100,
+                isFitWidth: true,
+                transitionDuration: '0.5s',
+                "gutter": 5
+            });
+
+            GetTopManifests(8);
+        });
+
+        // Get top n manifests from server and append to the DOM
+        var GetTopManifests = function (num) {
+            $.ajax({
+                url: "/Manifest/GetTopRanked/",
+                data: { numOfRecords: num, skip: manifestSkip },
+                cache: false,
+                type: "GET",
+                success: function (data) {
+                    //var markup = "";
+                    if (jQuery.isEmptyObject(data)) {
+                        DisableGetMore();
+                    }
+                    else {
+                        if (data.length < num) {
+                            DisableGetMore();
+                        }
+
+                        for (var i = 0; i < data.length; i++) {
+                            var currManifest = data[i];
+
+                            var markup = String.format('<div id="{0}" class="panel panel-default grid-item"> <div class="row"> <div class="col-xs-6"> <h4 class="panel-heading">{1}</h4> </div> <div class="col-xs-6"> <h4 class="panel-heading">{2}</h4> </div> </div> <p class="panel-body">{3}</p> <div class="row text-center rank-manage"> <div class="col-xs-4"> <button type="button" class="btn btn-default glyph-button" onClick="DownvoteManifest(\'{0}\');"> <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> </button> </div> <div class="col-xs-4"> <p class="rank">{4}</p> </div> <div class="col-xs-4"> <button type="button" class="btn btn-default glyph-button" onClick="UpvoteManifest(\'{0}\');"> <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> </button> </div> </div> </div>',
+                                currManifest.Id, currManifest.Author, currManifest.Timestamp, currManifest.Text, currManifest.Rank);
+
+                            var item = $(markup);
+
+                            $('.grid').masonry()
+                                .append(item)
+                                .masonry('appended', item);
+                        }
+
+                        manifestSkip += data.length;
+                    }
+                },
+                error: function (reponse) {
+                    alert("error : " + reponse);
+                }
+            });
+        }
+
+        // Upvote requested manifest
+        var UpvoteManifest = function (manifestId) {
+            var url = "/Manifest/Upvote/";
+            $.ajax({
+                url: url,
+                data: { id: manifestId },
+                cache: false,
+                type: "POST",
+                success: function (result) {
+                    if (result == "True") {
+                        var rank = $('#' + manifestId + ' .rank').text();
+                        rank++;
+                        $('#' + manifestId + ' .rank').text(rank);
+                        $('#' + manifestId + ' :button').prop('disabled', true);
+                    }
+                    else {
+                        alert("Unable to upvote post");
+                    }
+                }
+            });
+        }
+
+        // Downvote requested manifest
+        var DownvoteManifest = function (manifestId) {
+            var url = "/Manifest/Downvote/";
+            $.ajax({
+                url: url,
+                data: { id: manifestId },
+                cache: false,
+                type: "POST",
+                success: function (result) {
+                    if (result == "True") {
+                        var rank = $('#' + manifestId + ' .rank').text();
+                        rank--;
+                        $('#' + manifestId + ' .rank').text(rank);
+                        $('#' + manifestId + ' :button').prop('disabled', true);
+                    }
+                    else {
+                        alert("Unable to downvote post");
+                    }
+                }
+            });
+        }
+
+        var DisableGetMore = function () {
+            $('#getmore span').removeClass('glyphicon-menu-down').addClass('glyphicon-minus');
+            $('#getmore').prop('disabled', true);
+        }
+    </script>
+}

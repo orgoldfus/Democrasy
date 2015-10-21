@@ -1,0 +1,13 @@
+- Two pages: New & Trending
+- Main page is New
+- Every page contains 3 rows with 4 posts each
+- User can add post
+- User can upvote / downvote post
+- After up/down vote - post disappears
+- Extra - Post post on facebook
+
+post object:
+- Id
+- timestamp
+- text
+- author

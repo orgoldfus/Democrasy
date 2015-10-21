@@ -1,0 +1,29 @@
+<div id="{0}" class="panel panel-default grid-item"> 
+	<div class="row"> 
+		<div class="col-xs-6"> 
+			<h4 class="panel-heading">{1}</h4> 
+		</div> 
+		<div class="col-xs-6"> 
+			<h4 class="panel-heading">{2}</h4> 
+		</div> 
+	</div> 
+	<p class="panel-body">{3}</p> 
+	<div class="row text-center"> 
+		<div class="col-xs-4"> 
+			<button type="button" class="btn btn-default glyph-button" onClick="DownvoteManifest(\'{0}\');"> <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> </button> 
+		</div> 
+		<div class="col-xs-4"> 
+			<p class="rank">{4}</p> 
+		</div> 
+		<div class="col-xs-4"> 
+			<button type="button" class="btn btn-default glyph-button" onClick="UpvoteManifest(\'{0}\');"> <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> </button> 
+		</div> 
+	</div> 
+</div>
+
+
+{0} - Id
+{1} - Author
+{2} - Timestamp
+{3} - Text
+{4} - Rank
