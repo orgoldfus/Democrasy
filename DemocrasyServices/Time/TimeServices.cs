@@ -19,6 +19,7 @@ namespace DemocrasyServices.Time
 
         public static int GetCurrentUnixTimeStamp()
         {
+            // Return current unix timestamp
             return (int)Math.Floor((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds);
         }
     }

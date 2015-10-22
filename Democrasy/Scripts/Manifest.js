@@ -65,29 +65,15 @@ var GetManifests = function (num, url) {
 
 // Upvote requested manifest
 var UpvoteManifest = function (manifestId) {
-    var url = "/Manifest/Upvote/";
-    $.ajax({
-        url: url,
-        data: { id: manifestId },
-        cache: false,
-        type: "POST",
-        success: function (result) {
-            if (result == "True") {
-                var rank = $('#' + manifestId + ' .rank').text();
-                rank++;
-                $('#' + manifestId + ' .rank').text(rank);
-                $('#' + manifestId + ' :button').prop('disabled', true);
-            }
-            else {
-                alert("Unable to upvote post");
-            }
-        }
-    });
+    ChangeManifestRank(manifestId, "/Manifest/Upvote/", 1);
 }
 
 // Downvote requested manifest
 var DownvoteManifest = function (manifestId) {
-    var url = "/Manifest/Downvote/";
+    ChangeManifestRank(manifestId, "/Manifest/Downvote/", -1);
+}
+
+var ChangeManifestRank = function (manifestId, url, change) {
     $.ajax({
         url: url,
         data: { id: manifestId },
@@ -96,12 +82,12 @@ var DownvoteManifest = function (manifestId) {
         success: function (result) {
             if (result == "True") {
                 var rank = $('#' + manifestId + ' .rank').text();
-                rank--;
+                rank = parseInt(rank) + change;
                 $('#' + manifestId + ' .rank').text(rank);
                 $('#' + manifestId + ' :button').prop('disabled', true);
             }
             else {
-                alert("Unable to downvote post");
+                alert("Unable to change manifest's rank");
             }
         }
     });

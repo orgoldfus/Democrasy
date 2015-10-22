@@ -31,46 +31,18 @@ namespace DemocrasyBackOffice.Manifesto
 
         public dynamic GetTopManifests(int numOfRecords, int skip = 0)
         {
-            var manifestCollection = GetManifestCollection();
-
             var filter = new BsonDocument();
             var sort = Builders<Manifest>.Sort.Descending("Rank");
 
-            var task = manifestCollection.Find(filter).Sort(sort).Skip(skip).Limit(numOfRecords).ToListAsync();
-            var result = task.Result;
-
-            var manifests = result.Select(x => new 
-            { 
-                Id = x.Id.ToString(), 
-                Timestamp = TimeServices.UnixTimeStampToDateTime(x.Timestamp).ToString(),
-                Author = x.Author,
-                Text = x.Text,
-                Rank = x.Rank
-            });
-
-            return manifests;
+            return GetManifests(filter, sort, numOfRecords, skip);
         }
 
         public dynamic GetNewManifests(int numOfRecords, int skip = 0)
         {
-            var manifestCollection = GetManifestCollection();
-
             var filter = new BsonDocument();
             var sort = Builders<Manifest>.Sort.Descending("Timestamp");
 
-            var task = manifestCollection.Find(filter).Sort(sort).Skip(skip).Limit(numOfRecords).ToListAsync();
-            var result = task.Result;
-
-            var manifests = result.Select(x => new
-            {
-                Id = x.Id.ToString(),
-                Timestamp = TimeServices.UnixTimeStampToDateTime(x.Timestamp).ToString(),
-                Author = x.Author,
-                Text = x.Text,
-                Rank = x.Rank
-            });
-
-            return manifests;
+            return GetManifests(filter, sort, numOfRecords, skip);
         }
 
         public bool UpvoteManifest(string id)
@@ -108,6 +80,25 @@ namespace DemocrasyBackOffice.Manifesto
             var database = client.GetDatabase("Democrasy");
             
             return database.GetCollection<Manifest>("Manifest");
+        }
+
+        private dynamic GetManifests(BsonDocument filter, SortDefinition<Manifest> sort, int numOfRecords, int skip)
+        {
+            var manifestCollection = GetManifestCollection();
+
+            var task = manifestCollection.Find(filter).Sort(sort).Skip(skip).Limit(numOfRecords).ToListAsync();
+            var result = task.Result;
+
+            var manifests = result.Select(x => new
+            {
+                Id = x.Id.ToString(),
+                Timestamp = TimeServices.UnixTimeStampToDateTime(x.Timestamp).ToString(),
+                Author = x.Author,
+                Text = x.Text,
+                Rank = x.Rank
+            });
+
+            return manifests;
         }
     }
 }

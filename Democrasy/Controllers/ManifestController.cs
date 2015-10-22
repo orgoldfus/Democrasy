@@ -45,7 +45,7 @@ namespace Democrasy.Controllers
         {
             var result = service.CreateManifest(text, author);
 
-            return Redirect("/Home/Index");
+            return Redirect("/Home/New");
         }
 
         [HttpPost]

@@ -279,10 +279,10 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\New.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\Manifest\CreateManifest.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\Manifest\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

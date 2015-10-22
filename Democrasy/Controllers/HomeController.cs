@@ -10,22 +10,16 @@ namespace Democrasy.Controllers
     {
         public ActionResult Index()
         {
-            ViewBag.Title = "Democrasy - Top Rated Manifests";
-
             return View();
         }
 
         public ActionResult New()
         {
-            ViewBag.Title = "Democrasy - Newest Manifests";
-
             return View();
         }
 
         public ActionResult About()
         {
-            ViewBag.Title = "About";
-
             return View();
         }
     }
