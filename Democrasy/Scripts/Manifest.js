@@ -57,8 +57,9 @@ var GetManifests = function (num, url) {
                 manifestSkip += data.length;
             }
         },
-        error: function (reponse) {
-            alert("error : " + reponse);
+        error: function (response) {
+            alert("An error accurd while trying to get manifests. Please try again later.");
+            console.log("Error on GetManifests.", response);
         }
     });
 }
